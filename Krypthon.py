@@ -12,7 +12,7 @@ def main():
     running = True
     default_columns = "80"
     default_rows = "24"
-    Terminal.setSizeTerminal("180", "124")
+    Terminal.setSizeTerminal("200", "124")
 
     menuMain = MenuMain()
     while running != False:

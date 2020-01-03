@@ -1,17 +1,12 @@
 from gui.Menu import Menu
 from gui.MenuCiphers import MenuCiphers
-#from menuUsers import MenuUsers
 from gui.Terminal import Terminal
-#from menuMovies import MenuMovie
-#from menuGenders import MenuGenders
 import os.path
 
 class MenuMain(Menu):
     def __init__(self):
-        #self._menuUsers = 0
-        #self._menuMovies = 0
-        #self._menuGenders = 0
-        self._option = 0
+        self._optionMenu = 0
+        self._optionSubMenu = 0
         self._columns = self.COLUMNS
         self._rows = self.ROWS
         self._running = True
@@ -21,35 +16,29 @@ class MenuMain(Menu):
         
         while self._running != False:
             self.menu = 0
-            #self.menuMovies = 0
-            #self.menuCategories = 0
-            #self.menuSearch = 0
-            self._option = 0
+            self._optionMenu = 0
             self._columns = self.COLUMNS
             self._rows = self.ROWS
             self._running = True
 
             self.menu_title()
-            
-            if self.getOption() == '1':
+            option = self.getOptionMenu('menu')
+            if option == 1:
                 self._menu = MenuCiphers()
                 self._running = self._menu.run()
-            #elif self.getOption() == '2':
-                #self._menuMovies = MenuMovie()
-                #self._running = self._menuMovies.run()
-            #elif self.getOption() == '3':
-                #self._menuGenders = MenuGenders()
-                #self._running = self._menuGenders.run()
-            elif self.getOption() == '0':
+            elif option == 2:
+                self._menu = MenuCiphers()
+                self._running = self._menu.run()
+            elif option == 3:
+                self._menu = MenuCiphers()
+                self._running = self._menu.run()
+            elif option == 0:
                 self._running = False
-            else:
-                Terminal.print("\t\t\t --> ERROR = The option doesn't exist")
-                input()
-                self._running = True
 
         return False
     
     def title(self):
+        Terminal.clean()
         Terminal.print()
         Terminal.print("\t\t\t\t ██╗  ██╗██████╗ ██╗   ██╗██████╗ ████████╗██╗  ██╗ ██████╗ ███╗   ██╗ ", "red")
         Terminal.print("\t\t\t\t ██║ ██╔╝██╔══██╗╚██╗ ██╔╝██╔══██╗╚══██╔══╝██║  ██║██╔═══██╗████╗  ██║ ", "red")
@@ -92,6 +81,8 @@ class MenuMain(Menu):
         Terminal.print()
         self._rows = self._rows - 16
         Terminal.print("\t\t\t --> (1) CRYPTHOGRAPHY - Encryption/Decryption using Ciphers.", "yellow")
+        Terminal.print("\t\t\t --> (2) BRUTE FORCE   - Cracking Ciphers using Brute Force.", "yellow")
+        Terminal.print("\t\t\t --> (3) Stenagrophy   - .", "yellow")
         Terminal.print("\t\t\t --> (0) Close", "yellow")
 
         Terminal.print()
@@ -100,4 +91,4 @@ class MenuMain(Menu):
             self._rows = self._rows - 1
             Terminal.print()
 
-        self.textGetOption()
+        self.inputNumberOptionMenu('menu', 'Main Menu', 0, 3)
