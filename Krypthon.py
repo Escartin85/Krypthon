@@ -30,12 +30,6 @@ def main():
     height = default_rows
     Terminal.setSizeTerminal(default_columns, default_rows)
     #Terminal.defaultSizeTerminal()
-                                                                
-
-
-
-
-
 
 if __name__ == '__main__':
     main()

@@ -426,14 +426,21 @@ class CipherKRYPTHON(CipherCaesar):
         for row in range(longText):
             self._encrypted_text += caesar.encrypt(self._text[row], keys[count])
             count += 1
-            
-        #print(self._encrypted_text)
+        
+        reverse = CipherReverse(2)
+        textReverse = reverse.reverseAll(self._encrypted_text)
+        self._encrypted_text = textReverse
         return self._encrypted_text
 
     def decrypt(self, text, key):
+        reverse = CipherReverse(2)
+        textReverse = reverse.reverseAll(text)
+
         self._text = ''
-        self._encrypted_text = text
+        self._encrypted_text = textReverse
         longText = len(text)
+
+        
 
         # Generate auto key based on the key. Each key is multiply 
         keysPair = []
