@@ -1,5 +1,6 @@
 
 from core.cryptography.CryptoMath import CryptoMath
+from gui.Terminal import Terminal
 import math
 import sys, random
 
@@ -18,10 +19,10 @@ class Cipher():
         self._key = ''
         # the mode to "encrypt" or "decrypt"
         self._mode = ''
-        self.loadSymbolsToUse()
+        self.loadSymbolsToUse(symbols_used)
         
     
-    def loadSymbolsToUse(self):
+    def loadSymbolsToUse(self, symbols_used=2):
         self.SYMBOLS_USED = self.SYMBOLS
         if symbols_used == 1:
             self.SYMBOLS_USED = self.LETTERS
@@ -44,18 +45,15 @@ class Cipher():
     
     def getKey(self):
         return self._key
-    
+
     def getRandomKey(self):
-        while True:
-            keyA = random.randint(2, len(self.SYMBOLS_USED))
-            keyB = random.randint(2, len(self.SYMBOLS_USED))
-            if cryptomath.gcd(keyA, len(self.SYMBOLS_USED)) == 1:
-                return keyA * len(self.SYMBOLS_USED) + keyB
+        return random.randint(2, len(self.SYMBOLS_USED))
 
 class CipherReverse(Cipher):
-    def __init__(self, text=''):
-        self._text = text
+    def __init__(self, symbols_used):
+        self._text = ''
         self._encrypted_text = ''
+        self.loadSymbolsToUse(symbols_used)
 
     def reverseAll(self, text):
         self._text = text
@@ -68,7 +66,7 @@ class CipherReverse(Cipher):
 
 # Caesar Cipher
 class CipherCaesar(Cipher):
-    def __init__(self):
+    def __init__(self, symbols_used):
         # the string to be encrypted/decrypted
         self._text = ''
         self._encrypted_text = ''
@@ -76,36 +74,7 @@ class CipherCaesar(Cipher):
         self._key = ''
         # the mode to "encrypt" or "decrypt"
         self._mode = ''
-
-    def cracking_brute_force(self, text, visualMode=True):
-        self._text = ''
-        self._encrypted_text = text
-        # loop through every possible key:
-        for key in range(len(self.SYMBOLS_USED)):
-            # it is important to set translated to the blank string so that the
-            # previous iteration's value for translated is cleared:
-            translated = ''
-                
-            for symbol in self._encrypted_text:
-                # Only symbols in the SYMBOLS string can be encrypted/decrypted.
-                if symbol in self.SYMBOLS_USED:
-                    symbolIndex = self.SYMBOLS_USED.find(symbol)
-                    translatedIndex = symbolIndex - key
-                    
-                    # handle wraparound, if needed:
-                    if translatedIndex < 0:
-                        translatedIndex = translatedIndex + len(self.SYMBOLS_USED)
-                    # append the decrypted symbol
-                    translated = translated + self.SYMBOLS_USED[translatedIndex]
-                else:
-                    # append the symbol without encrypting/decrypting:
-                    translated = translated + symbol
-            if visualMode == True:
-                # Display every possible decryption:
-                print('Key #%s: %s' % (key, translated))
-
-        # return the translated string:
-        return self._encrypted_text
+        self.loadSymbolsToUse(symbols_used)
 
     def encrypt(self, text, key):
         self._text = text
@@ -125,6 +94,7 @@ class CipherCaesar(Cipher):
 
     def modeEncryptDecrypt(self, mode):
         translatedText = ''
+
         for symbol in self._text:
             # Only symbols in the SYMBOLS string can be encrypted/decrypted.
             if symbol in self.SYMBOLS_USED:
@@ -151,7 +121,7 @@ class CipherCaesar(Cipher):
 # Caesar Transposition
 class CipherTransposition(Cipher):  
     
-    def __init__(self):
+    def __init__(self, symbols_used):
         # the string to be encrypted/decrypted
         self._text = ''
         self._encrypted_text = ''
@@ -159,6 +129,7 @@ class CipherTransposition(Cipher):
         self._key = ''
         # the mode to "encrypt" or "decrypt"
         self._mode = ''
+        self.loadSymbolsToUse(symbols_used)
         
     def encrypt(self, text, key):
         self._text = text
@@ -218,37 +189,13 @@ class CipherTransposition(Cipher):
         return ''.join(self._text)
 
 
-    def cracking_brute_force(self, text, visualMode=True):
-        print('Hacking...')
-
-        # Python programs can be stopped at any time by pressing Ctrl-C (on
-        # Windows) or Ctrl-D (on Mac and Linux)
-        #print('(Press Ctrl-C or Ctrl-D to quit at any time.)')
-        # Brute-force by looping through every possible key.
-        #for key in range(1, len(text)):
-        #    print('Trying key #%s...' % (key))
-
-        #    decryptedText = transpositionCipher.decryptMessage(key, text)
-
-        #    if detectEnglish.isEnglish(decryptedText):
-                # Ask user if this is the correct decryption.
-         #       print()
-        #        print('Possible encryption hack:')
-        #        print('Key %s: %s' % (key, decryptedText[:100]))
-        #        print()
-        #        print('Enter D if done, anything else to continue hacking:')
-        #        response = input('> ')
-
-        #        if response.strip().upper().startswith('D'):
-        #            return decryptedText
-
-        return None
+    
 
 # Caesar Affine
 class CipherAffine(Cipher):
-    def __init__(self):
+    def __init__(self, symbols_used):
         # the string to be encrypted/decrypted
-        self._text = text
+        self._text = ''
         self._encrypted_text = ''
         # the encryption/descryption key:
         self._key = ''
@@ -256,40 +203,42 @@ class CipherAffine(Cipher):
         self._keyB = ''
         # the mode to "encrypt" or "decrypt"
         self._mode = ''
+        self.loadSymbolsToUse(symbols_used)
+ 
+    def getRandomKey(self):
+        while True:
+            keyA = random.randint(2, len(self.SYMBOLS_USED))
+            keyB = random.randint(2, len(self.SYMBOLS_USED))
+            if CryptoMath.gcd(keyA, len(self.SYMBOLS_USED)) == 1:
+                return keyA * len(self.SYMBOLS_USED) + keyB
     
     def getKeyParts(self, key):
         keyA = int(key) // len(self.SYMBOLS_USED)
         keyB = int(key) % len(self.SYMBOLS_USED)
         return (keyA, keyB)
 
-
-    def checkKeys(self, key, mode='encrypt'):
-        self._mode = mode
-        self._key = key
-        keyA, keyB = self.getKeyParts(self._key)
-        self._keyA = keyA
-        self._keyB = keyB
+    def checkKey(self, key, mode='encrypt'):
+        keyA, keyB = self.getKeyParts(key)
         if keyA == 1 and mode == 'encrypt':
-            sys.exit('Cipher is weak if key A is 1. Choose a different key.')
+            Terminal.print("WARNING! Cipher is weak if key A is 1. Choose a different key." , "yellow")
             return False
         if keyB == 0 and mode == 'encrypt':
-            sys.exit('Cipher is weak if key B is 0. Choose a different key.')
+            Terminal.print("WARNING! Cipher is weak if key B is 0. Choose a different key." , "yellow")
             return False
         if keyA < 0 or keyB < 0 or keyB > len(self.SYMBOLS_USED) - 1:
-            sys.exit('Key A must be greater than 0 and Key B must be between 0 and %s.' % (len(self.SYMBOLS_USED) - 1))
+            Terminal.print('WARNING! Key A must be greater than 0 and Key B must be between 0 and %s.' % (len(self.SYMBOLS_USED) - 1), "yellow")
             return False
         if CryptoMath.gcd(keyA, len(self.SYMBOLS_USED)) != 1:
-            sys.exit('Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, len(self.SYMBOLS_USED)))
+            Terminal.print('WARNING! Key A (%s) and the symbol set size (%s) are not relatively prime. Choose a different key.' % (keyA, len(self.SYMBOLS_USED)), "yellow")
             return False
         return True
 
-    def encrypt(self, text, keyA, keyB):
+    def encrypt(self, text, key):
         self._text = text
         self._key = key
+        self._keyA, self._keyB = self.getKeyParts(key)
         self._encrypted_text = ''
         self._mode = 'encrypt'
-        #keyA, keyB = self.getKeyParts(self._key)
-        #self.checkKeys(keyA, keyB, self._mode)
         for symbol in self._text:
             if symbol in self.SYMBOLS_USED:
                 # Encrypt the symbol:
@@ -301,30 +250,27 @@ class CipherAffine(Cipher):
         return self._encrypted_text
 
     def decrypt(self, text, key):
-        self._encrypted_text = textEncrypt
+        self._encrypted_text = text
         self._key = key
+        self._keyA, self._keyB = self.getKeyParts(key)
         self._mode = 'decrypt'
         self._text = ''
-        keyA, keyB = self.getKeyParts(self._key)
-        self.checkKeys(keyA, keyB, self._mode)
-        modInverseOfKeyA = cryptomath.findModInverse(keyA, len(self.SYMBOLS_USED))
+        modInverseOfKeyA = CryptoMath.findModInverse(self._keyA, len(self.SYMBOLS_USED))
 
-        for symbol in self._text:
+        for symbol in self._encrypted_text:
             if symbol in self.SYMBOLS:
                 # Decrypt the symbol:
                 symbolIndex = self.SYMBOLS_USED.find(symbol)
-                self._text += self.SYMBOLS_USED[(symbolIndex - keyB) * modInverseOfKeyA % len(self.SYMBOLS_USED)]
+                self._text += self.SYMBOLS_USED[(symbolIndex - self._keyB) * modInverseOfKeyA % len(self.SYMBOLS_USED)]
             else:
                 # Append the symbol without decrypting.
                 self._text += symbol 
         return self._text
 
-    def cracking_brute_force(self, text, visualMode=True):
-        print()
 
 # Caesar Simple Substitution
 class CipherSimpSub(Cipher):
-    def __init__(self):
+    def __init__(self, symbols_used):
         # the string to be encrypted/decrypted
         self._text = ''
         self._encrypted_text = ''
@@ -332,6 +278,7 @@ class CipherSimpSub(Cipher):
         self._key = ''
         # the mode to "encrypt" or "decrypt"
         self._mode = ''
+        self.loadSymbolsToUse(symbols_used)
     
     def getRandomKeyLetters(self):
         key = list(self.LETTERS)
@@ -377,45 +324,135 @@ class CipherSimpSub(Cipher):
     def decrypt(self, text, key='LFWOAYUISVKMNXPBDCRJTQEGHZ'):
         return self.translateMessage(key, text, 'decrypt')
 
-    def cracking_brute_force(self, text, visualMode=True):
-        print()
-
-# Caesar AES
-class CipherAES(Cipher):
-    def __init__(self):
-        # the string to be encrypted/decrypted
-        self._text = text
-        self._encrypted_text = ''
-        # the encryption/descryption key:
-        self._key = ''
-        # the mode to "encrypt" or "decrypt"
-        self._mode = ''
-    
-    def encrypt(self, text, key):
-        print()
-
-    def decrypt(self, text, key):
-        print()
-
-    def cracking_brute_force(self, text, visualMode=True):
-        print()
 
 # Caesar KRYPTHON
-class CipherKRYPTHON(Cipher):
-    def __init__(self):
+class CipherKRYPTHON(CipherCaesar):
+    def __init__(self, symbols_used):
         # the string to be encrypted/decrypted
-        self._text = text
+        self._text = ''
         self._encrypted_text = ''
         # the encryption/descryption key:
         self._key = ''
         # the mode to "encrypt" or "decrypt"
         self._mode = ''
+        self.loadSymbolsToUse(symbols_used)
+    def generatePrimNumbers(self, key):
+        primNumbers = []
+        count = 3
+        maxNumber = len(self.SYMBOLS_USED)
+        while count <= maxNumber:
+            isprime = True
+            
+            for x in range(2, int(math.sqrt(count) + 1)):
+                if count % x == 0: 
+                    isprime = False
+                    break
+            
+            if isprime:
+                if key <=count:
+                    primNumbers.append(count)
+            count += 1
+        return primNumbers
+
+    def generatePairNumbers(self, key):
+        countKey = 0
+        pairNumbers = []
+        maxNumber = len(self.SYMBOLS_USED)
+        multip = key
+        num = key
+        while num <= maxNumber:
+            multip = key * multip
+            num = multip
+            if num > maxNumber:
+                break
+            pairNumbers.append(multip)
+                
+        return pairNumbers
+
+    def getKeys(self, pairKeys, primKeys, text):
+        longText = len(text)
+        maxCounter = 0
+        if len(pairKeys) > len(primKeys):
+            maxCounter = len(pairKeys)
+        else:
+            maxCounter = len(primKeys)
+        
+        keys = []
+        count = 0
+        while len(keys) <= longText:
+            if len(keys) == longText:
+                break
+            if count >= maxCounter:
+                count = 0
+            if len(pairKeys) > 0:
+                if count < len(pairKeys):
+                    keys.append(pairKeys[count])
+            if len(primKeys) > 0:
+                if count < len(primKeys):
+                    keys.append(primKeys[count])
+            count += 1
+
+        return keys
+
+    def getRandomChar(self):
+        char = '.'
+        num = self.getRandomKey()
+        count = 0
+        for character in self.SYMBOLS_USED:
+            if num == count:
+                char = character
+            count += 1
+        return char
     
     def encrypt(self, text, key):
-        print()
+        self._text = text
+        self._encrypted_text = ''
+        longText = len(text)
+
+        # Generate auto key based on the key. Each key is multiply 
+        keysPair = []
+        keysPrime = []
+
+        keysPrime = self.generatePrimNumbers(key)
+        keysPair = self.generatePairNumbers(key)
+        #print(keysPair)
+        #print(keysPrime)
+        #print("--")
+        count = 0
+        keys = []
+        keys = self.getKeys(keysPair, keysPrime, text)
+        #print(keys)
+        caesar = CipherCaesar(2)
+        for row in range(longText):
+            self._encrypted_text += caesar.encrypt(self._text[row], keys[count])
+            count += 1
+            
+        #print(self._encrypted_text)
+        return self._encrypted_text
 
     def decrypt(self, text, key):
-        print()
+        self._text = ''
+        self._encrypted_text = text
+        longText = len(text)
 
-    def cracking_brute_force(self, text, visualMode=True):
-        print()
+        # Generate auto key based on the key. Each key is multiply 
+        keysPair = []
+        keysPrime = []
+
+        keysPrime = self.generatePrimNumbers(key)
+        keysPair = self.generatePairNumbers(key)
+        #print(keysPair)
+        #print(keysPrime)
+        #print("--")
+        count = 0
+        keys = []
+        keys = self.getKeys(keysPair, keysPrime, text)
+        #print(keys)
+        caesar = CipherCaesar(2)
+        for row in range(longText):
+            self._text += caesar.decrypt(self._encrypted_text[row], keys[count])
+            count += 1
+            
+        #print(self._text)
+        #print("--")
+        return self._text

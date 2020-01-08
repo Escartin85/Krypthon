@@ -7,7 +7,7 @@ import os.path
 
 class MenuCiphers(Menu):
 
-    CIPHERS_NAME = ['Reverse', 'Caesar', 'Transposition', 'Affine', 'Simple Substitution', 'Vigenere', 'AES', 'KRYPTHON']
+    CIPHERS_NAME = ['Reverse', 'Caesar', 'Transposition', 'Affine', 'Simple Substitution', 'KRYPTHON']
     def __init__(self):
         self._columns = self.COLUMNS
         self._rows = self.ROWS
@@ -15,6 +15,7 @@ class MenuCiphers(Menu):
         self._running = True
         self._optionMenu = 0
         self._optionSubMenu = 0
+        self._symbol_to_use = 2
         self.MenuTitle()
 
     # Print the head of table
@@ -36,12 +37,10 @@ class MenuCiphers(Menu):
         Terminal.print("\t\t\t --> (4) Cipher %s - " % (self.CIPHERS_NAME[3]), "yellow")
         Terminal.print("\t\t\t --> (5) Cipher %s - " % (self.CIPHERS_NAME[4]), "yellow")
         Terminal.print("\t\t\t --> (6) Cipher %s - " % (self.CIPHERS_NAME[5]), "yellow")
-        Terminal.print("\t\t\t --> (7) Cipher %s - " % (self.CIPHERS_NAME[6]), "yellow")
-        Terminal.print("\t\t\t --> (8) Cipher %s - " % (self.CIPHERS_NAME[7]), "yellow")
         Terminal.print("\t\t\t --> (0) Close", "yellow")
         self._rows = self._rows - 4
         Terminal.print()
-        self.inputNumberOptionMenu('menu', 'Crypthography', 0, 8)
+        self.inputNumberOptionMenu('menu', 'Crypthography', 0, 6)
 
 
     def title_sub_menu(self):
@@ -88,12 +87,14 @@ class MenuCiphers(Menu):
         symbol_option = input("\t\t\t\t Choise SYMBOLS option to use in the text:  ")
         if symbol_option == '1' or symbol_option == '2' or symbol_option == '3' or symbol_option == '4':
             self._symbol_to_use = int(symbol_option)
-        else:self._symbol_to_use = 2
+        else:
+            self._symbol_to_use = 2
         
 
     def input_original_text(self):
         text_isRight = False
         text_final = []
+        text = ''
         while text_isRight != True:
             text = input("\t\t\t\t Inside Text:  ")
             symbolsNotAllowed = []
@@ -118,17 +119,46 @@ class MenuCiphers(Menu):
                 Terminal.print()
                 symbolsNotAllowed = ''.join(symbolsNotAllowed)
                 Terminal.print("\t\t\t\t  WARNING! The input text doesn't allow characters %s " % (symbolsNotAllowed), "red")
+                symbolsNotAllowed = []
+                text = ''
+                text_final = []
                 Terminal.print()
             else:
                 text_isRight = True
         
         return ''.join(text_final)
 
+    def input_number_key(self):
+        keyIsNumber = False
+        numKey = 0
+        while keyIsNumber == False:
+            try:
+                tempKey = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
+                keyIsNumber = True
+            except:
+                Terminal.print("ERROR! Key input is NOT a NUMBER", "red")
+                keyIsNumber = False
+        
+        numKey = tempKey
+        return numKey
+    
+    def input_letters_key(self):
+        keyIsNumber = False
+        numKey = 0
+        while keyIsNumber == False:
+            try:
+                tempKey = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
+                keyIsNumber = True
+            except:
+                Terminal.print("ERROR! Key input is NOT a NUMBER", "red")
+                keyIsNumber = False
+        
+        numKey = tempKey
+        return numKey
+    
     def option_cipher(self):
         option = self.getOptionMenu('menu')
         optionSub = self.getOptionMenu('submenu')
-        #print('Option %s' % (option))
-        #print('OptionSub %s' % (optionSub))
 
         self.input_symbols_option()
         text_original = self.input_original_text()
@@ -137,87 +167,123 @@ class MenuCiphers(Menu):
         autoKey = True
         # If the option of input is for use Cipher Reverse option
         if option == 1:
-            cipher = CipherReverse()
+            cipher = CipherReverse(self._symbol_to_use)
             neededKey = False
             autoKey = False
             if optionSub == 1 or optionSub == 2:
                 text_translated = cipher.reverseAll(text_original)
-                self.show_processed_text_original(text_original)
-                self.show_processed_text_translated(text_translated)
         
         # If the option of input is for use Cipher Caesar option
         elif option == 2:
-            cipher = CipherCaesar()
-            key = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
+            cipher = CipherCaesar(self._symbol_to_use)
+            key = self.input_number_key()
+            neededKey = True
             if key == 0:
                 autoKey = True
-                key = cipher.getRandomKey()      
+                key = cipher.getRandomKey()
+            keyUsed = key
             # if the option of the sub Menu Caesar is encryption mode
             if optionSub == 1:
-                text_translated = cipher.encrypt(text_original, key)
+                text_translated = cipher.encrypt(text_original, keyUsed)
             # if the option of the sub Menu Caesar is decryption mode
             if optionSub == 2:
-                text_translated = cipher.decrypt(text_original, key)
+                text_translated = cipher.decrypt(text_original, keyUsed)
         
         # If the option of input is for use Cipher Transposition option
         elif option == 3:
-            cipher = CipherTransposition()
+            cipher = CipherTransposition(self._symbol_to_use)
+            key = self.input_number_key()
+            neededKey = True
+            if key == 0:
+                autoKey = True
+                key = cipher.getRandomKey()
+            keyUsed = key
             # if the option of the sub Menu Transposition is encryption mode
             if optionSub == 1:
-                text_translated = cipher.encrypt(text_original)
+                text_translated = cipher.encrypt(text_original, keyUsed)
             # if the option of the sub Menu Transposition is decryption mode
             if optionSub == 2:
-                text_translated = cipher.decrypt(text_original)
+                text_translated = cipher.decrypt(text_original, keyUsed)
         
         # If the option of input is for use Cipher Affine option
         elif option == 4:
-            cipher = CipherAffine()
+            mode = ''
+            if optionSub == 1:mode = 'encrypt'
+            if optionSub == 2:mode = 'decrypt'
+            cipher = CipherAffine(self._symbol_to_use)
+            rightKey = False
+            neededKey = True
+            while rightKey == False:
+                key = self.input_number_key()
+                
+                if key == 0:
+                    autoKey = True
+                    rightAuto = False
+                    while rightAuto == False:
+                        key = cipher.getRandomKey()
+                        rightAuto = cipher.checkKey(key, mode)
+                    rightKey = rightAuto
+                else:
+                    rightKey = cipher.checkKey(key, mode)
+            
+            keyUsed = key
             # if the option of the sub Menu Affine is encryption mode
             if optionSub == 1:
-                text_translated = cipher.encrypt(text_original)
+                text_translated = cipher.encrypt(text_original, keyUsed)
             # if the option of the sub Menu Affine is decryption mode
             if optionSub == 2:
-                text_translated = cipher.decrypt(text_original)
+                text_translated = cipher.decrypt(text_original, keyUsed)
         
         # If the option of input is for use Cipher Simple Substitution option
         elif option == 5:
-            cipher = CipherSimpSub()
+            mode = ''
+            if optionSub == 1:mode = 'encrypt'
+            if optionSub == 2:mode = 'decrypt'
+            cipher = CipherSimpSub(self._symbol_to_use)
+            rightKey = False
+            neededKey = True
+            
+            while rightKey == False:
+
+                key = input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  ")
+                
+                if key == '0':
+                    autoKey = True
+                    rightAuto = False
+                    while rightAuto == False:
+                        key = cipher.getRandomKeyLetters()
+                        rightAuto = cipher.keyIsValid(key)
+                    rightKey = rightAuto
+                else:
+                    rightKey = cipher.keyIsValid(key)
+                    if rightKey == False:
+                        Terminal.print("ERROR! - There is an error in the key or symbol set.", "red")
+            
+            keyUsed = key
+            
             # if the option of the sub Menu Simple Substitution is encryption mode
             if optionSub == 1:
-                text_translated = cipher.encrypt(text_original)
+                text_translated = cipher.encrypt(text_original, key)
             # if the option of the sub Menu Simple Substitution is decryption mode
             if optionSub == 2:
-                text_translated = cipher.decrypt(text_original)
-        
-        # If the option of input is for use Cipher Vinegere option
-        elif option == 6:
-            cipher = CipherVinegere()
-            # if the option of the sub Menu Vinegere is encryption mode
-            if optionSub == 1:
-                text_translated = cipher.encrypt(text_original)
-            # if the option of the sub Menu Vinegere is decryption mode
-            if optionSub == 2:
-                text_translated = cipher.decrypt(text_original)
-        
-        # If the option of input is for use Cipher AES option
-        elif option == 7:
-            cipher = CipherAES()
-            # if the option of the sub Menu AES is encryption mode
-            if optionSub == 1:
-                text_translated = cipher.encrypt(text_original)
-            # if the option of the sub Menu AES is decryption mode
-            if optionSub == 2:
-                text_translated = cipher.decrypt(text_original)
+                text_translated = cipher.decrypt(text_original, key)
         
         # If the option of input is for use Cipher KRYPTHON option
-        elif option == 8:
-            cipher = CipherKRYPTHON()
+        elif option == 6:
+            cipher = CipherKRYPTHON(self._symbol_to_use)
+            key = self.input_number_key()
+            neededKey = True
+            if key == 0:
+                autoKey = True
+                key = cipher.getRandomKey()
+            keyUsed = key
             # if the option of the sub Menu KRYPTHON is encryption mode
             if optionSub == 1:
-                text_translated = cipher.encrypt(text_original)
+                text_translated = cipher.encrypt(text_original, key)
             # if the option of the sub Menu KRYPTHON is decryption mode
             if optionSub == 2:
-                text_translated = cipher.decrypt(text_original)
+                text_translated = cipher.decrypt(text_original, key)
+            
         
         self.show_processed_text_original(text_original)
         if neededKey == True:
@@ -233,18 +299,19 @@ class MenuCiphers(Menu):
     def show_processed_text_key(self, key, auto=False):
         optionMenu = self.getOptionMenu('submenu') - 1
         textInLine = ''
-        if self.getOptionMenu('submenu') - 1 == 1:
+        if self.getOptionMenu('submenu') == 1:
             textInLine = 'encrypt'
         else:textInLine = 'decrypt'
         if auto == True:
-            Terminal.print("\t\t\t\t\t Key AutoGenerated to %sting with %s: %s" %(textInLine, self.CIPHERS_NAME[optionMenu], key), "reset")
-        else:Terminal.print("\t\t\t\t\t Key used to %sting with %s: %s" %(textInLine, self.CIPHERS_NAME[optionMenu], key), "reset")
+            Terminal.print("\t\t\t\t\t Key AutoGenerated to %sting with %s:" %(textInLine, self.CIPHERS_NAME[self.getOptionMenu('menu') - 1]), "reset")
+        else:
+            Terminal.print("\t\t\t\t\t Key used to %sting with %s:" %(textInLine, self.CIPHERS_NAME[self.getOptionMenu('menu') - 1]), "reset")
         Terminal.print("\t\t\t\t\t\t %s" % (key), "blod")
 
     def show_processed_text_translated(self, translatedText):
         optionMenu = self.getOptionMenu('submenu') - 1
         textInLine = ''
-        if self.getOptionMenu('submenu') - 1 == 1:
+        if self.getOptionMenu('submenu') == 1:
             textInLine = 'encrypt'
         else:textInLine = 'decrypt'
         Terminal.print("\t\t\t\t\t Text %sed: " % (textInLine), "reset")
@@ -252,155 +319,6 @@ class MenuCiphers(Menu):
         Terminal.print()
         Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
         input()
-    
-
-    
-    
-    def cipher_caesar_encryption(self):
-        print()
-        text = input("\t\t\t\t Inside Text to Encrypt[Caesar]:  ")
-        key = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
-        cipher = CipherCaesar()
-        if key == 0:
-            key = cipher.getRandomKey()       
-        encrypt_text = cipher.encrypt(text, key)
-        print()
-        Terminal.print("\t\t\t\t\t Orginal Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (text), "blod")
-        Terminal.print("\t\t\t\t\t Encrypt[Caesar] Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (encrypt_text), "green")
-        Terminal.print()
-        Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
-        input()
-    
-    def cipher_caesar_decryption(self):
-        print()
-        text = input("\t\t\t\t Inside Text to Decrypt[Caesar]:  ")
-        key = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
-        cipher = CipherCaesar()
-        if key == 0:
-            key = cipher.getRandomKey()     
-        encrypt_text = cipher.decrypt(text, key)
-        print()
-        Terminal.print("\t\t\t\t\t Encrypt Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (text), "blod")
-        Terminal.print("\t\t\t\t\t Dencrypt[Caesar] Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (encrypt_text), "green")
-        Terminal.print()
-        Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
-        input()
-    
-    def cipher_caesar_brute_force(self):
-        print()
-        text = input("\t\t\t\t Inside Text to Cracking[Caesar]:  ")
-        cipher = CipherCaesar()
-        cipher.cracking_brute_force(text)
-        Terminal.print()
-        Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
-        input()
-
-    def cipher_transposition_encryption(self):
-        print()
-        text = input("\t\t\t\t Inside Text to Encrypt[Transposition]:  ")
-        key = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
-        
-        cipher = CipherTransposition()
-        if key == 0:
-            key = cipher.getRandomKey()
-        encrypt_text = cipher.encrypt(text, key)
-        print()
-        Terminal.print("\t\t\t\t\t Original Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (text), "blod")
-        Terminal.print("\t\t\t\t\t Encrypt Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (encrypt_text), "green")
-        Terminal.print()
-        Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
-        input()
-
-    def cipher_transposition_decryption(self):
-        print()
-        encrypt_text = input("\t\t\t\t Inside Text to Encrypt[Transposition]:  ")
-        key = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
-        cipher = CipherTransposition()
-        if key == 0:
-            key = cipher.getRandomKey()
-        text = cipher.decrypt(encrypt_text, key)
-        print()
-        Terminal.print("\t\t\t\t\t Encrypt Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (encrypt_text), "blod")
-        Terminal.print("\t\t\t\t\t Dencrypt[Caesar] Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (text), "green")
-        Terminal.print()
-        Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
-        input()
-    
-    def cipher_transposition_brute_force(self):
-        print()
-
-    def cipher_affine_encryption(self):
-        print()
-        encrypt_text = input("\t\t\t\t Inside Text to Encrypt[Affine]:  ")
-        key = int(input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  "))
-        rightKey = False
-        cipher = CipherAffine()
-        while rightKey == False:
-            if key == 0:
-                key = cipher.getRandomKey()
-            keyA, keyB = cipher.getKeyParts(key)
-            rightKey = cipher.checkKeys()
-            text = cipher.decrypt(encrypt_text, key)
-        print()
-        Terminal.print("\t\t\t\t\t Encrypt Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (encrypt_text), "blod")
-        Terminal.print("\t\t\t\t\t Dencrypt[Affine] Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (text), "green")
-        Terminal.print()
-        Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
-        input()
-
-    def cipher_affine_decryption(self):
-        print()
-    
-    def cipher_affine_brute_force(self):
-        print()
-
-    def cipher_simpSub_encryption(self):
-        print()
-        text = input("\t\t\t\t Inside Text to Encrypt[SimpSub]:  ")
-        
-        rightKey = False
-        cipher = CipherSimpSub()
-        key = 'L'
-        while rightKey == False:
-            if key != '0':
-                key = input("\t\t\t\t Inside Number Key | 0 [Autogenerate Key]:  ")
-            if key == '0':
-                key = cipher.getRandomKeyLetters()
-            if not cipher.keyIsValid(key):
-                Terminal.print("ERROR ! There is an error in the key or symbol set.", "red")
-            else:rightKey = True
-            
-        encrypt_text = cipher.encrypt(text, key)
-        print()
-        Terminal.print("\t\t\t\t\t Original Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (text), "blod")
-        Terminal.print("\t\t\t\t\t Encrypt[SimpSub] Text: ", "reset")
-        Terminal.print("\t\t\t\t\t\t %s" % (encrypt_text), "green")
-        Terminal.print()
-        Terminal.print("\t\t\t\t\t\t PRESS ANY KEY To CONTINUE", "yellow")
-        input()
-
-    def cipher_simpSub_decryption(self):
-        print()
-    
-    def cipher_simpSub_brute_force(self):
-        print()
-
-    def cipher_AES_encryption(self):
-        print()
-
-    def cipher_AES_decryption(self):
-        print()
 
     def cipher_KYPTHON(self):
         print()
