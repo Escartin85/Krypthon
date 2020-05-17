@@ -1,5 +1,6 @@
 from gui.Menu import Menu
 from gui.MenuCiphers import MenuCiphers
+from gui.MenuScraper import MenuScraper
 from gui.Terminal import Terminal
 import os.path
 
@@ -27,7 +28,7 @@ class MenuMain(Menu):
                 self._menu = MenuCiphers()
                 self._running = self._menu.run()
             elif option == 2:
-                self._menu = MenuCiphers()
+                self._menu = MenuScraper()
                 self._running = self._menu.run()
             elif option == 3:
                 self._menu = MenuCiphers()
@@ -81,13 +82,13 @@ class MenuMain(Menu):
         Terminal.print()
         self._rows = self._rows - 16
         Terminal.print("\t\t\t --> (1) CRYPTHOGRAPHY - Encryption/Decryption using Ciphers.", "yellow")
-        Terminal.print("\t\t\t --> (2) BRUTE FORCE   - Cracking Ciphers using Brute Force.", "yellow")
+        Terminal.print("\t\t\t --> (2) SCRAPPING     - Scrapper for FreeCyle website", "yellow")
         Terminal.print("\t\t\t --> (3) Stenagrophy   - .", "yellow")
         Terminal.print("\t\t\t --> (0) Close", "yellow")
 
         Terminal.print()
 
-        for y in range(1, self._rows - 4):
+        for y in range(1, self._rows - 20):
             self._rows = self._rows - 1
             Terminal.print()
 
